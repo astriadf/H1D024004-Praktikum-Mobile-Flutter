@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:tokokita/ui/login_page.dart';
+import 'package:tokokita/bloc/registrasi_bloc.dart';
+import 'package:tokokita/widget/success_dialog.dart';
+import 'package:tokokita/widget/warning_dialog.dart';
+
 
 class RegistrasiPage extends StatefulWidget {
   const RegistrasiPage({Key? key}) : super(key: key);
@@ -9,6 +12,7 @@ class RegistrasiPage extends StatefulWidget {
 
 class _RegistrasiPageState extends State<RegistrasiPage> {
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
   final _namaTextboxController = TextEditingController();
   final _emailTextboxController = TextEditingController();
   final _passwordTextboxController = TextEditingController();
@@ -98,35 +102,66 @@ class _RegistrasiPageState extends State<RegistrasiPage> {
   }
 
   Widget _buttonRegistrasi() {
-    return Center( // tombol ada di tengah
-      child: SizedBox(
-        width: 120, // lebar tombol
-        height: 40, //  tinggi tombol
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey[200],
-            foregroundColor: Colors.black,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4.0),
-            ),
-            elevation: 2,
-          ),
-          onPressed: () {
-            var validate = _formKey.currentState!.validate();
-            if (validate) {
-              // Pindah ke halaman Login
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginPage()),
-              );
-            }
-          },
-          child: const Text(
-            "Registrasi",
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-          ),
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFE8E8E8),
+        foregroundColor: Colors.black,
+        elevation: 2,
+        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
         ),
       ),
+      child: const Text(
+        "Registrasi",
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+          fontSize: 15,
+        ),
+      ),
+      onPressed: () {
+        var validate = _formKey.currentState!.validate();
+        if (validate) {
+          if (!_isLoading) _submit();
+        }
+      },
     );
+  }
+
+  void _submit() {
+    _formKey.currentState!.save();
+    setState(() {
+      _isLoading = true;
+    });
+
+    RegistrasiBloc.registrasi(
+      nama: _namaTextboxController.text,
+      email: _emailTextboxController.text,
+      password: _passwordTextboxController.text,
+    ).then((value) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => SuccessDialog(
+          description: "Registrasi berhasil, silahkan login",
+          okClick: () {
+            Navigator.pop(context);
+          },
+        ),
+      );
+    }, onError: (error) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => const WarningDialog(
+          description: "Registrasi gagal, silahkan coba lagi",
+        ),
+      );
+    });
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 }

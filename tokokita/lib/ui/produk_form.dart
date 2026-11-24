@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:tokokita/model/produk.dart';
+import 'package:tokokita/bloc/produk_bloc.dart';
+import 'package:tokokita/ui/produk_page.dart';
+import 'package:tokokita/widget/success_dialog.dart';
+import 'package:tokokita/widget/warning_dialog.dart';
 
 class ProdukForm extends StatefulWidget {
   Produk? produk;
@@ -10,6 +14,9 @@ class ProdukForm extends StatefulWidget {
 
 class _ProdukFormState extends State<ProdukForm> {
   final _formKey = GlobalKey<FormState>();
+
+  bool _isLoading = false;
+
   String judul = "Tambah Produk";
   String tombolSubmit = "Simpan";
 
@@ -102,33 +109,92 @@ class _ProdukFormState extends State<ProdukForm> {
       },
     );
   }
-  
+
   Widget _buttonSubmit() {
-    return Center(
-      child: SizedBox(
-        width: 120, 
-        height: 40, 
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey[200], 
-            foregroundColor: Colors.black,     
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4.0), 
-            ),
-            elevation: 2, 
-          ),
-          onPressed: () {
-            var validate = _formKey.currentState!.validate();
-            if (validate) {
-              Navigator.pop(context); // Kembali ke halaman list produk
-            }
-          },
-          child: Text(
-            tombolSubmit,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          ),
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFE8E8E8),
+        foregroundColor: Colors.black,
+        elevation: 2,
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
         ),
       ),
+      child: Text(
+        tombolSubmit,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+          fontSize: 15,
+        ),
+      ),
+      onPressed: () {
+        var validate = _formKey.currentState!.validate();
+        if (validate) {
+          if (!_isLoading) {
+            if (widget.produk != null) {
+              // kondisi update produk
+              ubah();
+            } else {
+              // kondisi tambah produk
+              simpan();
+            }
+          }
+        }
+      },
     );
+  }
+
+  simpan() {
+    setState(() {
+      _isLoading = true;
+    });
+    Produk createProduk = Produk(id: null);
+    createProduk.kodeProduk = _kodeProdukTextboxController.text;
+    createProduk.namaProduk = _namaProdukTextboxController.text;
+    createProduk.hargaProduk = int.parse(_hargaProdukTextboxController.text);
+
+    ProdukBloc.addProduk(produk: createProduk).then((value) {
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (BuildContext context) => const ProdukPage()));
+    }, onError: (error) {
+      print(error);
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => const WarningDialog(
+          description: "Simpan gagal, silahkan coba lagi",
+        ));
+    }).whenComplete(() {
+      setState(() {
+        _isLoading = false;
+      });
+    });
+  }
+
+  ubah() {
+    setState(() {
+      _isLoading = true;
+    });
+    Produk updateProduk = Produk(id: widget.produk!.id);
+    updateProduk.kodeProduk = _kodeProdukTextboxController.text;
+    updateProduk.namaProduk = _namaProdukTextboxController.text;
+    updateProduk.hargaProduk = int.parse(_hargaProdukTextboxController.text);
+
+    ProdukBloc.updateProduk(produk: updateProduk).then((value) {
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (BuildContext context) => const ProdukPage()));
+    }, onError: (error) {
+      print(error);
+      showDialog(
+          context: context,
+          builder: (BuildContext context) => const WarningDialog(
+            description: "Permintaan ubah data gagal, silahkan coba lagi",
+          ));
+    }).whenComplete(() {
+      setState(() {
+        _isLoading = false;
+      });
+    });
   }
 }

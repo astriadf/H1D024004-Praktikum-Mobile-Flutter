@@ -1,4 +1,4 @@
-# Aplikasi Flutter: Toko Kita (Part 1: Operasi CRUD & Autentikasi)
+# Aplikasi Flutter: Toko Kita (Part 1: Operasi CRUD & Autentikasi) dan Part 2 (Lanjutan)
 
 ## Identitas
 **Nama** : Astria Dina Fitri  
@@ -32,6 +32,16 @@ Komponen aplikasi di dalam folder `lib` dibagi berdasarkan fungsinya masing-masi
 - **`ui/produk_form.dart`**: Form untuk menambah dan mengubah data produk.
 - **`ui/produk_detail.dart`**: Halaman yang menampilkan informasi spesifik dari satu produk serta tombol Edit dan Delete.
 
+### 3. Komponen Helper & Bloc (Modul 5 Bagian 2)
+- **`helpers/user_info.dart`**: Mengelola penyimpanan lokal (*local storage*) menggunakan `shared_preferences` untuk menyimpan dan mengambil Token (auth_key) serta User ID setelah login berhasil.
+- **`helpers/app_exception.dart`**: Berisi class *custom exception* untuk menangani berbagai macam error HTTP (seperti `FetchDataException`, `BadRequestException`, dll) agar aplikasi tidak *crash* saat API gagal merespons.
+- **`helpers/api.dart`**: Berisi fungsi *request* HTTP (`post`, `get`, `delete`) ke REST API. Fungsi ini secara otomatis menyisipkan Token (Bearer Token) ke dalam *header* setiap kali melakukan permintaan.
+- **`helpers/api_url.dart`**: Menyimpan semua *endpoint* URL API (base URL, registrasi, login, produk) agar mudah diubah jika alamat server berpindah.
+- **`bloc/registrasi_bloc.dart` & `login_bloc.dart`**: Menghubungkan halaman UI dengan API autentikasi. `LoginBloc` bertugas mengirim data email/password dan mengembalikan Token, sedangkan `RegistrasiBloc` mengirim data pendaftaran user baru.
+- **`bloc/logout_bloc.dart`**: Bertugas menghapus data Token dan User ID dari *local storage* (`shared_preferences`) saat pengguna menekan tombol Logout.
+- **`bloc/produk_bloc.dart`**: Menghubungkan halaman UI produk dengan API. Berisi fungsi `getProduks()` untuk mengambil daftar produk, `addProduk()` untuk menyimpan, `updateProduk()` untuk mengubah, dan `deleteProduk()` untuk menghapus data.
+- **`widget/success_dialog.dart` & `warning_dialog.dart`**: Widget *pop-up* (dialog) kustom yang digunakan untuk menampilkan notifikasi berhasil (warna hijau) atau gagal (warna merah) saat proses CRUD dan autentikasi berlangsung.
+
 ## Kredensial Login
 Untuk mencoba fitur login, pastikan backend (API) sudah berjalan dan gunakan akun berikut:
 | Username/Email | Password |
@@ -42,13 +52,44 @@ Untuk mencoba fitur login, pastikan backend (API) sudah berjalan dan gunakan aku
 
 ## Video Demonstrasi Aplikasi
 <div style="text-align: center;">
+  <img src="ScreenRecord/Demo_Modul5Bagian2.gif" alt="Demo Aplikasi Toko Kita" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <b>Hasil Modul 5 Bagian 2 </b>
+</div>
+<div style="text-align: center;">
   <img src="ScreenRecord/DemoAplikasi.gif" alt="Demo Aplikasi Toko Kita" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <b>Hasil Modul 4 Bagian 1</b>
 </div>
 
 <br>
 
-## Dokumentasi Tampilan Aplikasi
-*(Geser gambar ke kiri/kanan untuk melihat semua halaman)*
+
+## Dokumentasi Perubahan Tampilan (Modul 5 Bagian 2)
+Pada bagian ini, aplikasi mulai menggunakan data dari database (REST API) menggantikan data *hardcode* (dummy) yang sebelumnya ada di Modul 4. Tampilan di bawah membuktikan bahwa data produk (Realme Smart TV) berhasil ditarik dari MySQL.
+
+<div style="display: flex; overflow-x: auto; gap: 15px; padding-bottom: 15px; padding-top: 10px;">
+  <div style="text-align: center; flex: 0 0 auto;">
+    <img src="Screenshots/modul5bagian2/sebelum_modifikasi_produkpage.png" alt="Sebelum Modifikasi" style="height: 350px; border: 1px solid #ddd; border-radius: 8px;"><br>
+    <b>Sebelum Modifikasi (Data Dummy)</b>
+  </div>
+  <div style="text-align: center; flex: 0 0 auto;">
+    <img src="Screenshots/modul5bagian2/sesudah_modifikasi_produkpage.jpeg" alt="Sesudah Modifikasi" style="height: 350px; border: 1px solid #ddd; border-radius: 8px;"><br>
+    <b>Sesudah Modifikasi (Data dari API)</b>
+  </div>
+  <div style="text-align: center; flex: 0 0 auto;">
+    <img src="Screenshots/modul5bagian2/registrasi_berhasil.jpeg" alt="Registrasi Berhasil" style="height: 350px; border: 1px solid #ddd; border-radius: 8px;"><br>
+    <b>Notifikasi Registrasi Berhasil</b>
+  </div>
+  <div style="text-align: center; flex: 0 0 auto;">
+    <img src="Screenshots/modul5bagian2/login_gagal.jpeg" alt="Login Gagal" style="height: 350px; border: 1px solid #ddd; border-radius: 8px;"><br>
+    <b>Notifikasi Login Gagal (Error Handling)</b>
+  </div>
+  <div style="text-align: center; flex: 0 0 auto;">
+    <img src="Screenshots/modul5bagian2/database_data-produk.png" alt="Database Produk" style="height: 350px; border: 1px solid #ddd; border-radius: 8px;"><br>
+    <b>Database MySQL (Data Produk)</b>
+  </div>
+</div>
+
+## Dokumentasi Tampilan Aplikasi (Modul 4 Bagian 1)
 
 <div style="display: flex; overflow-x: auto; gap: 15px; padding-bottom: 15px; padding-top: 10px;">
   <div style="text-align: center; flex: 0 0 auto;">
@@ -84,7 +125,6 @@ Untuk mencoba fitur login, pastikan backend (API) sudah berjalan dan gunakan aku
 <br>
 
 ## Dokumentasi Pengujian API (Postman)
-*(Geser gambar ke kiri/kanan untuk melihat semua pengujian)*
 
 <div style="display: flex; overflow-x: auto; gap: 15px; padding-bottom: 15px; padding-top: 10px;">
   <div style="text-align: center; flex: 0 0 auto;">
